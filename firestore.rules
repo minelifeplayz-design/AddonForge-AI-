@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation Blueprints
+    function isValidProject(data) {
+      return data.keys().hasAll(['id', 'name', 'type', 'userId', 'createdAt', 'updatedAt']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.name is string && data.name.size() <= 100 &&
+             data.type in ['behavior', 'resource', 'both'] &&
+             data.userId == request.auth.uid &&
+             data.createdAt is number &&
+             data.updatedAt is number;
+    }
+
+    function isValidCommunityAddon(data) {
+      return data.keys().hasAll(['id', 'projectId', 'authorId', 'authorName', 'name', 'description', 'downloadUrl', 'createdAt', 'expiresAt']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.authorId == request.auth.uid &&
+             data.authorName is string && data.authorName.size() <= 100 &&
+             data.name is string && data.name.size() <= 100 &&
+             data.downloadUrl is string && data.downloadUrl.size() <= 500 &&
+             data.createdAt is number &&
+             data.expiresAt is number &&
+             data.expiresAt == data.createdAt + (3 * 24 * 60 * 60 * 1000); // 3 days exactly
+    }
+
+    // Collection: Projects
+    match /projects/{projectId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      allow create: if isSignedIn() && isValidId(projectId) && isValidProject(incoming()) && (
+        incoming().createdAt == request.time.toMillis() &&
+        incoming().updatedAt == request.time.toMillis()
+      );
+      
+      allow update: if isSignedIn() && isValidId(projectId) && (
+        // Action: Edit Files
+        (incoming().diff(existing()).affectedKeys().hasOnly(['files', 'updatedAt']) && 
+         incoming().updatedAt == request.time.toMillis()) ||
+        // Action: Metadata Update
+        (incoming().diff(existing()).affectedKeys().hasOnly(['name', 'description', 'version', 'minGameVersion', 'updatedAt']) &&
+         incoming().updatedAt == request.time.toMillis())
+      ) && incoming().userId == existing().userId;
+
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Collection: Community Addons
+    match /community_addons/{addonId} {
+      allow read: if isSignedIn(); // Publicly readable by authenticated users
+      
+      allow create: if isSignedIn() && isValidId(addonId) && isValidCommunityAddon(incoming()) && (
+        incoming().createdAt == request.time.toMillis() &&
+        // Verifying the author actually owns the project they are sharing
+        get(/databases/$(database)/documents/projects/$(incoming().projectId)).data.userId == request.auth.uid
+      );
+      
+      allow delete: if isSignedIn() && existing().authorId == request.auth.uid;
+      
+      // No updates allowed to community addons once broadcasted
+      allow update: if false;
+    }
+  }
+}

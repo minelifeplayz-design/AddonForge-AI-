@@ -1,0 +1,6 @@
+{
+  "name": "AddonForge AI",
+  "description": "An AI-powered app for Minecraft Pocket Edition players to create, edit, and export fully functional addons.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
