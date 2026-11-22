@@ -1,11 +1,13 @@
 import type { Diagnostic, StudioProject } from "../types";
 import { validateVisualGraph } from "../visual";
 
-const isObject = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 export function validateProject(project: StudioProject): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   const paths = Object.keys(project.files);
+
   if (!project.name.trim()) diagnostics.push({ severity: "error", code: "PROJECT_NAME_EMPTY", message: "Project name is empty." });
   if (!/^[a-z0-9_]{1,32}$/.test(project.namespace)) diagnostics.push({ severity: "error", code: "NAMESPACE_INVALID", message: "Project namespace is invalid." });
 
@@ -30,7 +32,11 @@ export function validateProject(project: StudioProject): Diagnostic[] {
 
   if (project.files[bpPath] && project.files[rpPath]) {
     try {
-      const behavior = JSON.parse(project.files[bpPath]) as { header?: { uuid?: string }; modules?: Array<{ uuid?: string }>; dependencies?: Array<{ uuid?: string; version?: number[] }> };
+      const behavior = JSON.parse(project.files[bpPath]) as {
+        header?: { uuid?: string };
+        modules?: Array<{ uuid?: string; type?: string; entry?: string }>;
+        dependencies?: Array<{ uuid?: string; version?: number[]; module_name?: string; version?: string }>;
+      };
       const resource = JSON.parse(project.files[rpPath]) as { header?: { uuid?: string }; modules?: Array<{ uuid?: string }> };
       if (behavior.header?.uuid !== project.behaviorPackUuid) diagnostics.push({ severity: "error", code: "BP_HEADER_UUID_MISMATCH", path: bpPath, message: "Behavior Pack header UUID does not match project metadata." });
       if (resource.header?.uuid !== project.resourcePackUuid) diagnostics.push({ severity: "error", code: "RP_HEADER_UUID_MISMATCH", path: rpPath, message: "Resource Pack header UUID does not match project metadata." });
@@ -39,10 +45,26 @@ export function validateProject(project: StudioProject): Diagnostic[] {
       if (!behavior.dependencies?.some((dependency) => dependency.uuid === resource.header?.uuid && JSON.stringify(dependency.version) === JSON.stringify(project.version))) {
         diagnostics.push({ severity: "error", code: "PACK_DEPENDENCY_MISSING", path: bpPath, message: "Behavior Pack must depend on the matching Resource Pack UUID and version." });
       }
+      if (project.settings.enableScripts) {
+        if (!behavior.modules?.some((module) => module.type === "script" && module.entry === "scripts/main.js")) diagnostics.push({ severity: "error", code: "SCRIPT_MODULE_MISSING", path: bpPath, message: "Scripts are enabled but the Behavior Pack script module is missing." });
+        if (!behavior.dependencies?.some((dependency) => dependency.module_name === "@minecraft/server" && dependency.version === project.settings.scriptApiVersion)) diagnostics.push({ severity: "error", code: "SCRIPT_API_DEPENDENCY_MISSING", path: bpPath, message: "The Behavior Pack is missing its configured @minecraft/server dependency." });
+        if (!project.files["behavior_pack/scripts/main.js"]) diagnostics.push({ severity: "error", code: "SCRIPT_ENTRY_MISSING", path: "behavior_pack/scripts/main.js", message: "The script module entry file is missing." });
+      }
     } catch { /* JSON parser diagnostics above report malformed manifests. */ }
   }
 
-  if (project.files["behavior_pack/visual_logic/graph.json"]) {\n    try {\n      const graph = JSON.parse(project.files["behavior_pack/visual_logic/graph.json"]);\n      diagnostics.push(...validateVisualGraph(graph));\n      if (!project.files["behavior_pack/scripts/main.js"]) diagnostics.push({ severity: "error", code: "VISUAL_SCRIPT_MISSING", path: "behavior_pack/scripts/main.js", message: "Visual graph exists but its generated JavaScript file is missing." });\n    } catch (error) {\n      diagnostics.push({ severity: "error", code: "VISUAL_GRAPH_PARSE_ERROR", path: "behavior_pack/visual_logic/graph.json", message: error instanceof Error ? error.message : "Visual graph JSON is invalid." });\n    }\n  }\n\n  for (const path of paths.filter((entry) => entry.startsWith("resource_pack/textures/items/") && entry.endsWith(".png"))) {
+  const graphPath = "behavior_pack/visual_logic/graph.json";
+  if (project.files[graphPath]) {
+    try {
+      const graph: unknown = JSON.parse(project.files[graphPath]);
+      diagnostics.push(...validateVisualGraph(graph as Parameters<typeof validateVisualGraph>[0]));
+      if (!project.files["behavior_pack/scripts/main.js"]) diagnostics.push({ severity: "error", code: "VISUAL_SCRIPT_MISSING", path: "behavior_pack/scripts/main.js", message: "Visual graph exists but its generated JavaScript file is missing." });
+    } catch (error) {
+      diagnostics.push({ severity: "error", code: "VISUAL_GRAPH_PARSE_ERROR", path: graphPath, message: error instanceof Error ? error.message : "Visual graph JSON is invalid." });
+    }
+  }
+
+  for (const path of paths.filter((entry) => entry.startsWith("resource_pack/textures/items/") && entry.endsWith(".png"))) {
     if (!project.files[path].startsWith("data:image/png;base64,iVBORw0KGgo")) diagnostics.push({ severity: "error", code: "PNG_ASSET_INVALID", path, message: "Item texture does not contain a valid PNG data URL." });
   }
 
