@@ -5,7 +5,9 @@ export interface ProjectSettings { formatVersion: string; minEngineVersion: SemV
 export interface StudioProject {
   schemaVersion: 1; id: string; name: string; namespace: string; description: string;
   version: SemVer; createdAt: string; updatedAt: string; settings: ProjectSettings;
-  behaviorPackUuid: string; resourcePackUuid: string; files: Record<string, string>;
+  behaviorPackUuid: string; resourcePackUuid: string;
+  behaviorModuleUuid: string; resourceModuleUuid: string; scriptModuleUuid: string;
+  files: Record<string, string>;
 }
 export interface ItemDefinitionInput {
   identifier: string; displayName: string; textureKey: string; maxStackSize: number;
