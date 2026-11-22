@@ -7,6 +7,7 @@ import { Share } from "@capacitor/share";
 import { addItemToProject, createProject, CREATOR_REGISTRY, exportMcaddon, validateProject } from "../../studio";
 import { loadProjects, persistProjects } from "../../studio/storage/projectStore";
 import type { ItemDefinitionInput, StudioProject } from "../../studio";
+import { VisualScriptingEditor } from "./VisualScriptingEditor";
 
 const EMPTY_ITEM = { id: "ruby", displayName: "Ruby", textureKey: "ruby", maxStackSize: "64", category: "items" as ItemDefinitionInput["category"], textureDataUrl: "", textureFileName: "" };
 
@@ -36,6 +37,7 @@ export function StudioScreen() {
   const [notice, setNotice] = useState("");
   const [noticeIsError, setNoticeIsError] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [showVisualEditor, setShowVisualEditor] = useState(false);
 
   useEffect(() => {
     let active = true;

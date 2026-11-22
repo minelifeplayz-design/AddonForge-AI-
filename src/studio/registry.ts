@@ -9,7 +9,7 @@ export const CREATOR_REGISTRY: CreatorDefinition[] = [
   { id: "spawn-rules", label: "Spawn Rules", description: "Entity spawn conditions and population controls.", pack: "behavior", stage: "planned", output: ["spawn_rules/*.json"] },
   { id: "loot-tables", label: "Loot Tables", description: "Pools, entries, conditions, functions and drops.", pack: "behavior", stage: "planned", output: ["loot_tables/**/*.json"] },
   { id: "trade-tables", label: "Trade Tables", description: "Trade tiers and offers for supported entities.", pack: "behavior", stage: "planned", output: ["trading/**/*.json"] },
-  { id: "visual-logic", label: "Visual Logic", description: "Connect event, condition, variable and action blocks to generate JavaScript.", pack: "behavior", stage: "planned", output: ["scripts/**/*.js"] },
+  { id: "visual-logic", label: "Visual Scripting", description: "Connect event, condition, variable and action blocks to generate Bedrock JavaScript.", pack: "behavior", stage: "ready", output: ["scripts/**/*.js"] },
   { id: "animations", label: "Animations", description: "Animation definitions and animation controllers.", pack: "resource", stage: "planned", output: ["animations/*.json", "animation_controllers/*.json"] },
   { id: "particles", label: "Particles", description: "Particle effects, components, curves and events.", pack: "resource", stage: "planned", output: ["particles/*.json"] },
   { id: "geometry", label: "Geometry", description: "Import, inspect and organize Bedrock geometry models.", pack: "resource", stage: "planned", output: ["models/entity/*.geo.json"] },

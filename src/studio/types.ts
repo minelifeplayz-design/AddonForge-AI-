@@ -12,7 +12,7 @@ export interface StudioProject {
 export interface ItemDefinitionInput {
   identifier: string; displayName: string; textureKey: string; maxStackSize: number;
   category: "items" | "equipment" | "nature" | "construction";
-  formatVersion?: string; components?: Record<string, unknown>; textureDataUrl?: string;
+  formatVersion?: string; components?: Record<string, unknown>;
 }
 export interface GeneratedFile { path: string; content: string; pack: PackKind; }
 export interface Diagnostic { severity: DiagnosticSeverity; code: string; message: string; path?: string; line?: number; suggestion?: string; }

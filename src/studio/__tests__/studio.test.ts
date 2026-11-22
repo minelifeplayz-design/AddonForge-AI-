@@ -63,3 +63,41 @@ test("mcaddon contains nested behavior and resource mcpack archives including th
   assert.ok(rp.file("manifest.json"));
   assert.ok(rp.file("textures/items/ruby.png"));
 });
+
+import { createDefaultVisualGraph, applyVisualGraph, generateVisualScript, validateVisualGraph } from "../visual";
+
+test("visual graph generates a documented spawn event script and script manifest dependency", () => {
+  const project = createProject({ name: "Visual Test", namespace: "visualtest" });
+  const graph = createDefaultVisualGraph();
+  graph.nodes.push({ id: "condition-1", type: "condition", kind: "initialSpawn", value: "", variable: "" });
+  graph.nodes.push({ id: "action-1", type: "action", kind: "sendMessage", value: "Hello {player}", variable: "" });
+  assert.equal(validateVisualGraph(graph).filter((entry) => entry.severity === "error").length, 0);
+  const script = generateVisualScript(graph);
+  assert.match(script, /world\.afterEvents\.playerSpawn\.subscribe/);
+  assert.match(script, /if \(!event\.initialSpawn\) return/);
+  assert.match(script, /player\.sendMessage\("Hello " \+ player\.name\)/);
+  const updated = applyVisualGraph(project, graph);
+  const manifest = JSON.parse(updated.files["behavior_pack/manifest.json"]);
+  assert.equal(manifest.dependencies.find((entry: { module_name?: string }) => entry.module_name === "@minecraft/server").version, "2.0.0");
+  assert.ok(manifest.modules.some((entry: { type: string; entry?: string }) => entry.type === "script" && entry.entry === "scripts/main.js"));
+  assert.ok(updated.files["behavior_pack/visual_logic/graph.json"]);
+  assert.ok(updated.files["behavior_pack/scripts/main.js"]);
+});
+
+test("visual item-use condition validates event type and emits item type filter", () => {
+  const graph = createDefaultVisualGraph();
+  graph.nodes[0] = { ...graph.nodes[0], kind: "itemUse" };
+  graph.nodes.push({ id: "condition-1", type: "condition", kind: "itemTypeIdEquals", value: "minecraft:diamond", variable: "" });
+  graph.nodes.push({ id: "action-1", type: "action", kind: "sendMessage", value: "Diamond used by {player}", variable: "" });
+  assert.equal(validateVisualGraph(graph).filter((entry) => entry.severity === "error").length, 0);
+  assert.match(generateVisualScript(graph), /event\.itemStack\.typeId !== "minecraft:diamond"/);
+});
+
+test("visual graph rejects incompatible condition and malformed variable names", () => {
+  const graph = createDefaultVisualGraph();
+  graph.nodes.push({ id: "bad-condition", type: "condition", kind: "itemTypeIdEquals", value: "minecraft:diamond", variable: "" });
+  graph.nodes.push({ id: "bad-variable", type: "action", kind: "setVariable", value: "x", variable: "bad variable" });
+  assert.ok(validateVisualGraph(graph).some((entry) => entry.code === "VISUAL_CONDITION_EVENT_MISMATCH"));
+  assert.ok(validateVisualGraph(graph).some((entry) => entry.code === "VISUAL_VARIABLE_INVALID"));
+  assert.throws(() => generateVisualScript(graph));
+});

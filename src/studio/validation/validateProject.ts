@@ -1,4 +1,5 @@
 import type { Diagnostic, StudioProject } from "../types";
+import { validateVisualGraph } from "../visual";
 
 const isObject = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -41,7 +42,7 @@ export function validateProject(project: StudioProject): Diagnostic[] {
     } catch { /* JSON parser diagnostics above report malformed manifests. */ }
   }
 
-  for (const path of paths.filter((entry) => entry.startsWith("resource_pack/textures/items/") && entry.endsWith(".png"))) {
+  if (project.files["behavior_pack/visual_logic/graph.json"]) {\n    try {\n      const graph = JSON.parse(project.files["behavior_pack/visual_logic/graph.json"]);\n      diagnostics.push(...validateVisualGraph(graph));\n      if (!project.files["behavior_pack/scripts/main.js"]) diagnostics.push({ severity: "error", code: "VISUAL_SCRIPT_MISSING", path: "behavior_pack/scripts/main.js", message: "Visual graph exists but its generated JavaScript file is missing." });\n    } catch (error) {\n      diagnostics.push({ severity: "error", code: "VISUAL_GRAPH_PARSE_ERROR", path: "behavior_pack/visual_logic/graph.json", message: error instanceof Error ? error.message : "Visual graph JSON is invalid." });\n    }\n  }\n\n  for (const path of paths.filter((entry) => entry.startsWith("resource_pack/textures/items/") && entry.endsWith(".png"))) {
     if (!project.files[path].startsWith("data:image/png;base64,iVBORw0KGgo")) diagnostics.push({ severity: "error", code: "PNG_ASSET_INVALID", path, message: "Item texture does not contain a valid PNG data URL." });
   }
 

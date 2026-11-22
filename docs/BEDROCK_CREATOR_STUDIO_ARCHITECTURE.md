@@ -26,7 +26,7 @@ Bedrock Creator Studio is an Android-first, no-code-first Minecraft Bedrock add-
 
 - Typed project model and namespace normalization.
 - Behavior Pack and Resource Pack manifest generation.
-- Basic custom item definition generation.
+- Basic custom item definition generation.\n- Linear node-based visual scripting for player-spawn and item-use events, conditions, variables, messages and debug logging.\n- Generated JavaScript, graph persistence and automatic script-module manifest dependency.
 - PNG import and embedding in the Resource Pack.
 - Safe item insertion that merges atlas and localization entries.
 - IndexedDB project persistence with one-time migration from the first prototype's localStorage data.
@@ -38,7 +38,7 @@ Bedrock Creator Studio is an Android-first, no-code-first Minecraft Bedrock add-
 
 ## Planned creator coverage
 
-Blocks, entities, recipes, feature definitions, feature rules, spawn rules, loot tables, trade tables, visual JavaScript logic, animations, animation controllers, particles, geometry, render controllers, attachables, sounds, fog, camera and NPC dialogue remain Planned until each editor is implemented, schema-verified and tested in Minecraft.
+Blocks, entities, recipes, feature definitions, feature rules, spawn rules, loot tables, trade tables, advanced visual JavaScript logic (branching, loops, multiple event graphs and custom functions), animations, animation controllers, particles, geometry, render controllers, attachables, sounds, fog, camera and NPC dialogue remain Planned until each editor is implemented, schema-verified and tested in Minecraft.
 
 "Every Bedrock capability" is the long-term coverage goal, not a claim about the current build.
 

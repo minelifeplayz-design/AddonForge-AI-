@@ -6,3 +6,4 @@ export * from "./generators/manifest";
 export * from "./generators/item";
 export * from "./validation/validateProject";
 export * from "./export/exportMcaddon";
+export * from "./visual";
