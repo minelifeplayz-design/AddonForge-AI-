@@ -12,7 +12,9 @@ Bedrock Creator Studio is an Android-first, no-code-first editor for Minecraft B
 - Validate JSON syntax, pack/module UUIDs, pack dependency and imported PNG data.
 - Export both packs as nested `.mcpack` files inside one `.mcaddon` archive.
 - On Android, save the archive to the app cache and open the Android share sheet so the user can save or send it.
-- Build node-based visual scripts from player events, conditions, variables and actions.\n- Generate a JavaScript entry point and update the Behavior Pack script module manifest automatically.\n- Run automated generator, visual graph, validation and archive tests.
+- Build node-based visual scripts from player events, conditions, variables and actions.
+- Generate a JavaScript entry point and update the Behavior Pack script module manifest automatically.
+- Run automated generator, visual graph, validation and archive tests.
 
 ## Creator availability
 

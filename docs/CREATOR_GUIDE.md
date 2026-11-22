@@ -43,7 +43,7 @@ The Creator Library labels each module:
 - **Available** — implemented in this branch.
 - **Planned** — listed in the roadmap but not yet an editor.
 
-At this stage, paired project creation, custom item generation, PNG import, diagnostics and add-on export are available. Blocks, entities, recipes, world generation, animation, particles, visual JavaScript logic and the other listed systems remain planned.
+At this stage, paired project creation, custom item generation, PNG import, diagnostics, add-on export and the first linear Visual Scripting editor are available. Blocks, entities, recipes, world generation, animation, particles and advanced visual scripting features remain planned.
 
 ## 6. Local project storage
 
