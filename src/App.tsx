@@ -8,7 +8,7 @@ import { Layout, BottomNav } from './components/ui/Layout';
 import { WelcomeScreen } from './components/screens/WelcomeScreen';
 import { HomeScreen } from './components/screens/HomeScreen';
 import { CommunityScreen } from './components/screens/CommunityScreen';
-import { CreateScreen } from './components/screens/CreateScreen';
+import { StudioScreen } from './components/screens/StudioScreen';
 import { ProjectsScreen } from './components/screens/ProjectsScreen';
 import { ProfileScreen } from './components/screens/ProfileScreen';
 import { FirebaseProvider, useFirebase } from './contexts/FirebaseContext';
@@ -39,7 +39,7 @@ function AppContent() {
     switch (activeTab) {
       case 'home': return <HomeScreen onNavigate={setActiveTab} />;
       case 'community': return <CommunityScreen />;
-      case 'create': return <CreateScreen onComplete={() => setActiveTab('projects')} />;
+      case 'create': return <StudioScreen />;
       case 'projects': return <ProjectsScreen />;
       case 'profile': return <ProfileScreen />;
       default: return <HomeScreen onNavigate={setActiveTab} />;
