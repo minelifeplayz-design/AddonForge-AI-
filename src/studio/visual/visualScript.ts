@@ -50,7 +50,12 @@ function nodeCode(node: VisualNode): string[] {
     case "itemTypeIdEquals": return [`  if (event.itemStack.typeId !== ${quote(node.value.trim())}) return;`];
     case "variableEquals": return [`  if (variables[${quote(node.variable)}] !== ${quote(node.value)}) return;`];
     case "sendMessage": {
-      const messageExpression = node.value.split("{player}").map(quote).join(" + player.name + ");
+      const parts = node.value.split("{player}");
+      let messageExpression = quote(parts[0]);
+      for (let index = 1; index < parts.length; index += 1) {
+        messageExpression += " + player.name";
+        if (parts[index]) messageExpression += " + " + quote(parts[index]);
+      }
       return [`  player.sendMessage(${messageExpression});`];
     }
     case "setVariable": return [`  variables[${quote(node.variable)}] = ${quote(node.value)};`];

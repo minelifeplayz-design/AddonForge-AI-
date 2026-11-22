@@ -81,7 +81,7 @@ test("visual graph generates a documented spawn event script and script manifest
   assert.equal(manifest.dependencies.find((entry: { module_name?: string }) => entry.module_name === "@minecraft/server").version, "2.0.0");
   assert.ok(manifest.modules.some((entry: { type: string; entry?: string }) => entry.type === "script" && entry.entry === "scripts/main.js"));
   assert.ok(updated.files["behavior_pack/visual_logic/graph.json"]);
-  assert.ok(updated.files["behavior_pack/scripts/main.js"]);
+  assert.ok(updated.files["behavior_pack/scripts/main.js"]);\n  assert.equal(validateProject(updated).filter((diagnostic) => diagnostic.severity === "error").length, 0);
 });
 
 test("visual item-use condition validates event type and emits item type filter", () => {

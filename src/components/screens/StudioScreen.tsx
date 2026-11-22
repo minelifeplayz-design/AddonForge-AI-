@@ -190,7 +190,7 @@ export function StudioScreen() {
     return <div className="min-h-[70vh] grid place-items-center"><div className="text-center space-y-3"><div className="mx-auto h-10 w-10 rounded-full border-2 border-neon-purple border-t-transparent animate-spin" /><p className="text-xs text-gray-400">Opening local project library…</p></div></div>;
   }
 
-  if (activeProject) {
+  if (activeProject && showVisualEditor) {\n    return <VisualScriptingEditor project={activeProject} onBack={() => setShowVisualEditor(false)} onSave={(updated) => updateProjects(projects.map((project) => project.id === updated.id ? updated : project))} />;\n  }\n\n  if (activeProject) {
     return (
       <div className="space-y-5 pb-8">
         <header className="flex items-center gap-3">
@@ -204,7 +204,7 @@ export function StudioScreen() {
           </button>
         </header>
 
-        <section className="glass rounded-2xl p-4 space-y-3">
+        <button onClick={() => setShowVisualEditor(true)} className="w-full glass rounded-2xl p-4 flex items-center gap-3 text-left border border-neon-cyan/25">\n          <div className="h-10 w-10 rounded-xl bg-neon-cyan/10 text-neon-cyan flex items-center justify-center"><Wrench size={19} /></div>\n          <div className="min-w-0 flex-1"><p className="text-sm font-bold">Visual Scripting</p><p className="text-[11px] text-gray-400">Build event, condition and action flows without writing JavaScript</p></div>\n          <span className="text-[10px] text-green-400 uppercase">Available</span>\n        </button>\n\n        <section className="glass rounded-2xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="font-bold flex items-center gap-2"><Package size={17} className="text-neon-purple" /> Item Creator</h2>
             <span className="text-[10px] text-green-400 uppercase">Available</span>
