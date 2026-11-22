@@ -1,74 +1,43 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import { Component, type ErrorInfo, type ReactNode } from "react";
+import { StudioScreen } from "./components/screens/StudioScreen";
 
-import { useState } from 'react';
-import { Layout, BottomNav } from './components/ui/Layout';
-import { WelcomeScreen } from './components/screens/WelcomeScreen';
-import { HomeScreen } from './components/screens/HomeScreen';
-import { CommunityScreen } from './components/screens/CommunityScreen';
-import { StudioScreen } from './components/screens/StudioScreen';
-import { ProjectsScreen } from './components/screens/ProjectsScreen';
-import { ProfileScreen } from './components/screens/ProfileScreen';
-import { FirebaseProvider, useFirebase } from './contexts/FirebaseContext';
-import { AnimatePresence, motion } from 'motion/react';
+interface ErrorBoundaryState { hasError: boolean; message: string; }
 
-function AppContent() {
-  const { user, loading } = useFirebase();
-  const [activeTab, setActiveTab] = useState('home');
-  const [showWelcome, setShowWelcome] = useState(true);
+class AppErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
+  state: ErrorBoundaryState = { hasError: false, message: "" };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-dark-bg flex items-center justify-center">
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="w-12 h-12 rounded-full border-2 border-neon-purple neon-glow-purple"
-        />
-      </div>
-    );
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, message: error.message || "An unexpected application error occurred." };
   }
 
-  if (!user || showWelcome) {
-    return <WelcomeScreen onFinish={() => setShowWelcome(false)} />;
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error("Bedrock Creator Studio error:", error, info.componentStack);
   }
 
-  const renderScreen = () => {
-    switch (activeTab) {
-      case 'home': return <HomeScreen onNavigate={setActiveTab} />;
-      case 'community': return <CommunityScreen />;
-      case 'create': return <StudioScreen />;
-      case 'projects': return <ProjectsScreen />;
-      case 'profile': return <ProfileScreen />;
-      default: return <HomeScreen onNavigate={setActiveTab} />;
+  render() {
+    if (this.state.hasError) {
+      return (
+        <main className="min-h-screen bg-dark-bg text-white grid place-items-center p-6">
+          <section className="max-w-md glass rounded-2xl p-6 space-y-4">
+            <h1 className="text-xl font-bold">Studio could not open</h1>
+            <p className="text-sm text-gray-400">{this.state.message}</p>
+            <button onClick={() => window.location.reload()} className="w-full rounded-xl bg-neon-purple p-3 font-semibold">Reload Studio</button>
+          </section>
+        </main>
+      );
     }
-  };
-
-  return (
-    <Layout>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-          className="h-full"
-        >
-          {renderScreen()}
-        </motion.div>
-      </AnimatePresence>
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-    </Layout>
-  );
+    return this.props.children;
+  }
 }
 
 export default function App() {
   return (
-    <FirebaseProvider>
-      <AppContent />
-    </FirebaseProvider>
+    <AppErrorBoundary>
+      <main className="min-h-screen bg-dark-bg text-gray-100 cyber-grid">
+        <div className="mx-auto w-full max-w-xl px-4 pt-5 pb-10">
+          <StudioScreen />
+        </div>
+      </main>
+    </AppErrorBoundary>
   );
 }

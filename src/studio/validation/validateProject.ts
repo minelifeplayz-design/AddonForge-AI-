@@ -35,7 +35,7 @@ export function validateProject(project: StudioProject): Diagnostic[] {
       const behavior = JSON.parse(project.files[bpPath]) as {
         header?: { uuid?: string };
         modules?: Array<{ uuid?: string; type?: string; entry?: string }>;
-        dependencies?: Array<{ uuid?: string; version?: number[]; module_name?: string; version?: string }>;
+        dependencies?: Array<{ uuid?: string; version?: number[] | string; module_name?: string }>;
       };
       const resource = JSON.parse(project.files[rpPath]) as { header?: { uuid?: string }; modules?: Array<{ uuid?: string }> };
       if (behavior.header?.uuid !== project.behaviorPackUuid) diagnostics.push({ severity: "error", code: "BP_HEADER_UUID_MISMATCH", path: bpPath, message: "Behavior Pack header UUID does not match project metadata." });
