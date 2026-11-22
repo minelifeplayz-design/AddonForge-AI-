@@ -17,7 +17,9 @@ export function createProject(input: CreateProjectInput): StudioProject {
     description: input.description?.trim() || "A Minecraft Bedrock add-on.",
     version: input.version ?? [1, 0, 0], createdAt: now, updatedAt: now,
     settings: { formatVersion: input.formatVersion ?? "1.26.0", minEngineVersion: input.minEngineVersion ?? DEFAULT_ENGINE_VERSION, enableScripts: false },
-    behaviorPackUuid: uuidv4(), resourcePackUuid: uuidv4(), files: {}
+    behaviorPackUuid: uuidv4(), resourcePackUuid: uuidv4(),
+    behaviorModuleUuid: uuidv4(), resourceModuleUuid: uuidv4(), scriptModuleUuid: uuidv4(),
+    files: {}
   };
   project.files["behavior_pack/manifest.json"] = JSON.stringify(generateManifest(project, "behavior"), null, 2);
   project.files["resource_pack/manifest.json"] = JSON.stringify(generateManifest(project, "resource"), null, 2);
@@ -25,7 +27,9 @@ export function createProject(input: CreateProjectInput): StudioProject {
     schemaVersion: project.schemaVersion, id: project.id, name: project.name, namespace: project.namespace,
     description: project.description, version: project.version, createdAt: project.createdAt,
     updatedAt: project.updatedAt, settings: project.settings,
-    behaviorPackUuid: project.behaviorPackUuid, resourcePackUuid: project.resourcePackUuid
+    behaviorPackUuid: project.behaviorPackUuid, resourcePackUuid: project.resourcePackUuid,
+    behaviorModuleUuid: project.behaviorModuleUuid, resourceModuleUuid: project.resourceModuleUuid,
+    scriptModuleUuid: project.scriptModuleUuid
   }, null, 2);
   return project;
 }
