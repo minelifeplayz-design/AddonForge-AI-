@@ -12,17 +12,20 @@ export function generateManifest(project: StudioProject, pack: PackKind) {
     },
     modules: [{
       type: isBehavior ? "data" : "resources",
-      uuid: isBehavior ? project.behaviorPackUuid : project.resourcePackUuid,
+      uuid: isBehavior ? project.behaviorModuleUuid : project.resourceModuleUuid,
       version: project.version
     }]
   };
   if (isBehavior) {
-    const dependencies: Array<Record<string, string>> = [{ uuid: project.resourcePackUuid, version: project.version.join(".") }];
+    const dependencies: Array<Record<string, unknown>> = [{
+      uuid: project.resourcePackUuid,
+      version: project.version
+    }];
     if (project.settings.enableScripts && project.settings.scriptApiVersion) {
       manifest.dependencies = [...dependencies, { module_name: "@minecraft/server", version: project.settings.scriptApiVersion }];
       (manifest.modules as Array<Record<string, unknown>>).push({
         type: "script", language: "javascript", entry: "scripts/main.js",
-        uuid: crypto.randomUUID(), version: project.version
+        uuid: project.scriptModuleUuid, version: project.version
       });
     } else manifest.dependencies = dependencies;
   }
