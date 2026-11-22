@@ -12,6 +12,9 @@ function parseTextureAtlas(raw: string | undefined): Record<string, unknown> {
 }
 
 export function addItemToProject(project: StudioProject, input: ItemDefinitionInput): StudioProject {
+  if (!input.textureDataUrl?.startsWith("data:image/png;base64,iVBORw0KGgo")) {
+    throw new Error("Select a valid PNG texture before generating this item.");
+  }
   const generated = generateItem({ ...input, formatVersion: input.formatVersion ?? project.settings.formatVersion }, project.namespace);
   const itemFile = generated.find((file) => file.path.startsWith("behavior_pack/items/"));
   const atlasFile = generated.find((file) => file.path.endsWith("textures/item_texture.json"));
@@ -19,7 +22,10 @@ export function addItemToProject(project: StudioProject, input: ItemDefinitionIn
   if (!itemFile || !atlasFile || !languageFile) throw new Error("Item generator returned an incomplete file set.");
   if (project.files[itemFile.path]) throw new Error(`An item definition already exists at ${itemFile.path}.`);
 
-  const nextFiles = { ...project.files, [itemFile.path]: itemFile.content };
+  const texturePath = `resource_pack/textures/items/${input.identifier.split(":")[1]}.png`;
+  if (project.files[texturePath]) throw new Error(`A texture already exists at ${texturePath}.`);
+
+  const nextFiles = { ...project.files, [itemFile.path]: itemFile.content, [texturePath]: input.textureDataUrl };
   const atlasPath = "resource_pack/textures/item_texture.json";
   const atlas = parseTextureAtlas(nextFiles[atlasPath]);
   const textureData = atlas.texture_data as Record<string, unknown>;
@@ -38,7 +44,7 @@ export function addItemToProject(project: StudioProject, input: ItemDefinitionIn
   nextFiles[languagePath] = currentLanguage + (currentLanguage && !currentLanguage.endsWith("\n") ? "\n" : "") + languageFile.content;
 
   const updated: StudioProject = { ...project, files: nextFiles, updatedAt: new Date().toISOString() };
-  const projectMetadata = {
+  const metadata = {
     schemaVersion: updated.schemaVersion, id: updated.id, name: updated.name, namespace: updated.namespace,
     description: updated.description, version: updated.version, createdAt: updated.createdAt,
     updatedAt: updated.updatedAt, settings: updated.settings,
@@ -46,6 +52,6 @@ export function addItemToProject(project: StudioProject, input: ItemDefinitionIn
     behaviorModuleUuid: updated.behaviorModuleUuid, resourceModuleUuid: updated.resourceModuleUuid,
     scriptModuleUuid: updated.scriptModuleUuid
   };
-  updated.files["project.json"] = JSON.stringify(projectMetadata, null, 2);
+  updated.files["project.json"] = JSON.stringify(metadata, null, 2);
   return updated;
 }
